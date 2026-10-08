@@ -69,9 +69,10 @@ function addLine(...nodes) {
   line.append(...nodes);
   chat.append(line);
   while (chat.children.length > CONFIG.maxLines) chat.firstChild.remove();
-  if (!CONFIG.fadeSeconds) return;   // 0 = never fade; only maxLines removes lines
+  if (!CONFIG.fadeSeconds) return line;   // 0 = never fade; only maxLines removes lines
   setTimeout(() => line.classList.add("fade"), CONFIG.fadeSeconds * 1000);
   setTimeout(() => line.remove(), CONFIG.fadeSeconds * 1000 + 1000);
+  return line;
 }
 
 // Message text -> nodes, swapping emote ranges for <img>. Emote indices are code points.
@@ -128,12 +129,21 @@ function handleChat(tags, login, text) {
   const head = [span(isOfficer ? "[Officer] " : "[Guild] ", color)];
   if (isGM) head.push(span("<GM> ", CONFIG.colors.gm, "gm"));
   head.push(span(`[${name}]`, classColor(login), "name"), span(m ? " " : ": ", color));
-  addLine(...head, ...buildMessage(body, m ? "" : tags.emotes, color));
+  const line = addLine(...head, ...buildMessage(body, m ? "" : tags.emotes, color));
+  line.dataset.id = tags.id || "";       // for CLEARMSG (single message deleted)
+  line.dataset.login = login;            // for CLEARCHAT (timeout / ban)
 }
+
+// Moderator removals. AutoMod-held messages never reach chat, so there is nothing to catch there.
+function removeLines(sel) { chat.querySelectorAll(sel).forEach(l => l.remove()); }
 
 let ws;
 function handleLine(line) {
   if (line.startsWith("PING")) return ws && ws.send("PONG :tmi.twitch.tv");
+  let d = line.match(/^@(\S+) :tmi\.twitch\.tv CLEARMSG /);
+  if (d) { const id = parseTags(d[1])["target-msg-id"]; return id && removeLines(`.line[data-id="${CSS.escape(id)}"]`); }
+  d = line.match(/^(?:@\S+ )?:tmi\.twitch\.tv CLEARCHAT #\S+(?: :(\S+))?/);
+  if (d) return d[1] ? removeLines(`.line[data-login="${CSS.escape(d[1])}"]`) : (chat.textContent = "");
   const r = line.match(/^(?:@(\S+) )?:(\w+)!\S+ PRIVMSG #\S+ :(.*)$/);
   if (r) handleChat(parseTags(r[1] || ""), r[2], r[3]);
 }

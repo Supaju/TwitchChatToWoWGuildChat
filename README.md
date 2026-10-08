@@ -15,6 +15,7 @@ A single-file OBS Browser Source that shows your live Twitch chat styled like Wo
 - Messages stack from the bottom, keep a maximum number of lines, and fade out after a set time
 - Message text is inserted as plain text, so chat can't inject HTML
 - Ignores common bots (configurable)
+- Messages deleted by a moderator disappear from the overlay, and a timed-out or banned user's messages are removed. Messages held by AutoMod never reach chat, so they never appear
 - Transparent background with a dark text outline so it reads over any game
 - Test mode with fake chatters
 
