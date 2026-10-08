@@ -66,7 +66,7 @@ Everything is in the commented `CONFIG` object at the top of `ttvguildchat.html`
 | `fontFamily` | Arial Narrow + fallbacks | CSS font stack |
 | `maxLines` | `12` | Lines kept on screen; the oldest is removed first |
 | `fadeSeconds` | `30` | Seconds before a line fades out (plus a 1 second fade). `0` = never fade; lines then only leave when `maxLines` is exceeded |
-| `ignoredUsers` | `nightbot, streamelements, streamlabs` | Lowercase usernames to hide |
+| `ignoredUsers` | `nightbot, streamelements, streamlabs, spotchbot` | Lowercase usernames to hide |
 | `testIntervalMs` | `2000` | Delay between fake messages in test mode |
 | `colors.guild` | `#40FF40` | Guild chat text |
 | `colors.officer` | `#40C040` | Officer chat text (moderators) |
