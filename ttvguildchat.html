@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>WoW Guild Chat Overlay</title>
+<style>
+  html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; }
+  #chat { position: absolute; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 8px; }
+  .line { word-wrap: break-word; opacity: 1; transition: opacity 1s; font-weight: bold; }
+  .line.fade { opacity: 0; }
+  .name { cursor: default; }
+  .gm { color: #FFD100; }
+  .line img { height: 1.3em; vertical-align: middle; }
+</style>
+</head>
+<body>
+<div id="chat"></div>
+<script>
+// ===================== CONFIG — edit freely =====================
+const CONFIG = {
+  channel: "yourchannel",    // Twitch channel (lowercase). Override with ?channel=name
+  fontSize: 24,                    // px
+  fontFamily: '"Arial Narrow", "Liberation Sans Narrow", "Nimbus Sans Narrow", Arial, sans-serif',
+  maxLines: 12,                    // lines kept on screen
+  fadeSeconds: 30,                 // seconds before a line fades out
+  ignoredUsers: ["nightbot", "streamelements", "streamlabs"], // lowercase
+  testIntervalMs: 2000,            // ?test=1 fake message interval
+  colors: {
+    guild: "#40FF40",
+    officer: "#40C040",
+    system: "#FFFF00",
+    gm: "#FFD100",                 // the <GM> tag on the broadcaster
+    classes: {
+      Warrior: "#C69B6D", Paladin: "#F48CBA", Hunter: "#AAD372", Rogue: "#FFF468",
+      Priest: "#FFFFFF", "Death Knight": "#C41E3A", Shaman: "#0070DD", Mage: "#3FC7EB",
+      Warlock: "#8788EE", Monk: "#00FF98", Druid: "#FF7C0A", "Demon Hunter": "#A330C9",
+      Evoker: "#33937F"
+    }
+  }
+};
+// ================================================================
+
+const params = new URLSearchParams(location.search);
+const channel = (params.get("channel") || CONFIG.channel).toLowerCase().replace(/^#/, "");
+const chat = document.getElementById("chat");
+chat.style.font = `bold ${CONFIG.fontSize}px ${CONFIG.fontFamily}`;
+chat.style.textShadow = "-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 2px 2px 3px #000";
+
+const classColors = Object.values(CONFIG.colors.classes);
+const seen = new Set();
+
+function classColor(name) {
+  let h = 5381;
+  for (const c of name.toLowerCase()) h = ((h << 5) + h + c.charCodeAt(0)) >>> 0;
+  return classColors[h % classColors.length];
+}
+
+function span(text, color, cls) {
+  const s = document.createElement("span");
+  s.textContent = text;            // textContent => no HTML injection possible
+  if (color) s.style.color = color;
+  if (cls) s.className = cls;
+  return s;
+}
+
+function addLine(...nodes) {
+  const line = document.createElement("div");
+  line.className = "line";
+  line.append(...nodes);
+  chat.append(line);
+  while (chat.children.length > CONFIG.maxLines) chat.firstChild.remove();
+  setTimeout(() => line.classList.add("fade"), CONFIG.fadeSeconds * 1000);
+  setTimeout(() => line.remove(), CONFIG.fadeSeconds * 1000 + 1000);
+}
+
+// Message text -> nodes, swapping emote ranges for <img>. Emote indices are code points.
+function buildMessage(text, emoteTag, color) {
+  const chars = Array.from(text);
+  const ranges = [];
+  for (const e of (emoteTag || "").split("/")) {
+    if (!e) continue;
+    const [id, pos] = e.split(":");
+    for (const r of pos.split(",")) {
+      const [a, b] = r.split("-").map(Number);
+      ranges.push({ id, a, b });
+    }
+  }
+  ranges.sort((x, y) => x.a - y.a);
+  const out = [];
+  let i = 0;
+  for (const { id, a, b } of ranges) {
+    if (a < i) continue;
+    if (a > i) out.push(span(chars.slice(i, a).join(""), color));
+    const img = document.createElement("img");
+    img.src = `https://static-cdn.jtvnw.net/emoticons/v2/${encodeURIComponent(id)}/default/dark/2.0`;
+    img.alt = chars.slice(a, b + 1).join("");
+    out.push(img);
+    i = b + 1;
+  }
+  if (i < chars.length) out.push(span(chars.slice(i).join(""), color));
+  return out;
+}
+
+function parseTags(raw) {
+  const tags = {};
+  for (const kv of raw.split(";")) {
+    const [k, ...v] = kv.split("=");
+    tags[k] = v.join("=").replace(/\\(.)/g, (_, c) => ({ s: " ", ":": ";", r: "\r", n: "\n" }[c] || c));
+  }
+  return tags;
+}
+
+function handleChat(tags, login, text) {
+  if (CONFIG.ignoredUsers.includes(login.toLowerCase())) return;
+  const badges = (tags.badges || "").split(",").map(b => b.split("/")[0]);
+  const name = tags["display-name"] || login;
+  const isGM = badges.includes("broadcaster");
+  const isOfficer = !isGM && badges.includes("moderator");
+  const color = isOfficer ? CONFIG.colors.officer : CONFIG.colors.guild;
+
+  if (!seen.has(login)) {
+    seen.add(login);
+    addLine(span(`[${name}] has come online.`, CONFIG.colors.system));
+  }
+  const m = text.match(/^\x01ACTION (.*)\x01$/);   // /me
+  const body = m ? m[1] : text;
+  const head = [span(isOfficer ? "[Officer] " : "[Guild] ", color)];
+  if (isGM) head.push(span("<GM> ", CONFIG.colors.gm, "gm"));
+  head.push(span(`[${name}]`, classColor(login), "name"), span(m ? " " : ": ", color));
+  addLine(...head, ...buildMessage(body, m ? "" : tags.emotes, color));
+}
+
+let ws;
+function handleLine(line) {
+  if (line.startsWith("PING")) return ws && ws.send("PONG :tmi.twitch.tv");
+  const r = line.match(/^(?:@(\S+) )?:(\w+)!\S+ PRIVMSG #\S+ :(.*)$/);
+  if (r) handleChat(parseTags(r[1] || ""), r[2], r[3]);
+}
+
+function connect() {
+  ws = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
+  ws.onopen = () => {
+    ws.send("CAP REQ :twitch.tv/tags twitch.tv/commands");
+    ws.send("PASS SCHMOOCHIES");
+    ws.send("NICK justinfan" + Math.floor(10000 + Math.random() * 89999));
+    ws.send("JOIN #" + channel);
+  };
+  ws.onmessage = e => e.data.split("\r\n").filter(Boolean).forEach(handleLine);
+  ws.onclose = () => setTimeout(connect, 3000);
+  ws.onerror = () => ws.close();
+}
+
+function startTest() {
+  const users = [
+    ["Thrallfan", ""], ["xX_Healz_Xx", ""], ["LootGoblin", ""], ["Arthas99", ""],
+    ["ModMagnus", "moderator/1"], ["TheStreamer", "broadcaster/1"]
+  ];
+  const msgs = ["lol", "Kappa", "that boss is so hard", "LFM for raid, need healer", "gg", "<b>html</b> is escaped", "/me waves"];
+  setInterval(() => {
+    const [n, b] = users[Math.floor(Math.random() * users.length)];
+    let msg = msgs[Math.floor(Math.random() * msgs.length)];
+    let emotes = msg === "Kappa" ? "25:0-4" : "";
+    if (msg === "/me waves") msg = "\x01ACTION waves\x01";
+    handleLine(`@badges=${b};display-name=${n};emotes=${emotes} :${n.toLowerCase()}!${n.toLowerCase()}@x.tmi.twitch.tv PRIVMSG #${channel} :${msg}`);
+  }, CONFIG.testIntervalMs);
+}
+
+if (params.get("test")) startTest(); else connect();
+</script>
+</body>
+</html>
