@@ -1,8 +1,8 @@
-# Twitch Chat → WoW Guild Chat Overlay
+﻿# Twitch Chat â†’ WoW Guild Chat Overlay
 
 A single-file OBS Browser Source that shows your live Twitch chat styled like World of Warcraft guild chat. No install, no libraries, no Twitch login or app registration.
 
-![Preview](wow_test.png)
+![Preview](preview.png)
 
 ## Features
 
