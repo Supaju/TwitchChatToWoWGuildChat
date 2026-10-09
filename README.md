@@ -58,9 +58,9 @@ Combine them with `&`, e.g. `?channel=somestreamer&test=1`.
 
 ## Configuration
 
-Put your settings in `config.js` (created from `config.example.js` during Setup). List only the options you want to change: to use one, remove the `//` in front of its line in the example and set the value. Anything you leave out uses the default below, which lives in the `CONFIG` object at the top of `ttvguildchat.html`.
+Put your settings in `config.js` (created from `config.example.js` during Setup). The example lists the common options, all active at their defaults, so just edit the values you want. Delete any line and that option uses the default below, which lives in the `CONFIG` object at the top of `ttvguildchat.html`.
 
-Because your settings are in a separate file that the repo never contains, you update by replacing `ttvguildchat.html` and keeping your `config.js`. Options you didn't override pick up any new defaults automatically, and newly added options work without you touching your file.
+Because your settings are in a separate file that the repo never contains, you update by replacing `ttvguildchat.html` and keeping your `config.js`. Options you deleted from your `config.js` pick up any new defaults automatically, and newly added options work without you touching your file. Options still listed keep your value, even if a later version changes the default.
 
 `colors`, `colors.classes` and `colorAliases` merge, so you can override a single entry. `ignoredUsers` replaces the whole default list, so include every name you want ignored.
 
