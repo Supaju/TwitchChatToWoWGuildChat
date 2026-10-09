@@ -127,3 +127,10 @@ The command message itself never appears in the overlay, and an invalid color is
 ## How it works
 
 The page opens a WebSocket to `wss://irc-ws.chat.twitch.tv:443`, logs in anonymously as `justinfan<random number>`, requests the `twitch.tv/tags` capability for badges, display names and emote data, and joins the channel. It is read-only: it cannot send chat messages.
+
+## More Twitch chat overlays
+
+Same engine, different games:
+
+- [Phasmophobia Radio](https://github.com/Supaju/TwitchChatPhasmoOverlay): walkie-talkie chatter in a CRT terminal font with ghost-type colors.
+- [Warframe Clan Chat](https://github.com/Supaju/TwitchChatWarframeOverlay): `[Clan] [Name]: message` in clan green with in-game timestamps and damage-type name colors.
