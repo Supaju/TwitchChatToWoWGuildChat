@@ -22,12 +22,12 @@ A single-file OBS Browser Source that shows your live Twitch chat styled like Wo
 
 ## Setup
 
-1. **Download** `ttvguildchat.html` and save it somewhere permanent, e.g. `C:\Overlays\`. OBS reads it from that location every time, so don't move it afterwards.
-2. **Set your channel.** Open the file in a text editor and change the channel in the `CONFIG` block near the top:
+1. **Download** `ttvguildchat.html` and `config.example.js` into a folder you'll keep, e.g. `C:\Overlays\`. OBS reads the files from that location every time, so don't move them afterwards.
+2. **Set your channel.** Copy `config.example.js` to `config.js` (same folder), open `config.js` in a text editor and change the channel:
    ```js
    channel: "yourchannel",
    ```
-   Use your Twitch channel name (the login name, not a display name with special characters). Alternatively, leave the file alone and append `?channel=yourname` to the URL (see [URL parameters](#url-parameters)).
+   Use your Twitch channel name (the login name, not a display name with special characters). Alternatively, append `?channel=yourname` to the URL (see [URL parameters](#url-parameters)).
 3. **Add it to OBS.**
    - In **Sources**, click **+** and choose **Browser**.
    - Tick **Local file** and browse to `ttvguildchat.html`.
@@ -58,7 +58,20 @@ Combine them with `&`, e.g. `?channel=somestreamer&test=1`.
 
 ## Configuration
 
-Everything is in the commented `CONFIG` object at the top of `ttvguildchat.html`:
+Put your settings in `config.js` (created from `config.example.js` during Setup). List only the options you want to change: to use one, remove the `//` in front of its line in the example and set the value. Anything you leave out uses the default below, which lives in the `CONFIG` object at the top of `ttvguildchat.html`.
+
+Because your settings are in a separate file that the repo never contains, you update by replacing `ttvguildchat.html` and keeping your `config.js`. Options you didn't override pick up any new defaults automatically, and newly added options work without you touching your file.
+
+`colors`, `colors.classes` and `colorAliases` merge, so you can override a single entry. `ignoredUsers` replaces the whole default list, so include every name you want ignored.
+
+```js
+// config.js
+const USER_CONFIG = {
+  channel: "mychannel",
+  fadeSeconds: 0,
+  colors: { guild: "#40FF40" },
+};
+```
 
 | Setting | Default | Description |
 |---|---|---|
@@ -81,7 +94,7 @@ Everything is in the commented `CONFIG` object at the top of `ttvguildchat.html`
 
 OBS loads the page once and doesn't watch the file. After changing anything:
 
-1. Save the file.
+1. Save `config.js`.
 2. In OBS, select the Browser Source and click **Refresh cache of current page** in its Properties (or right-click the source and choose Refresh).
 
 The overlay reconnects within a few seconds. Lines currently on screen disappear.

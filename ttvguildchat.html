@@ -15,6 +15,7 @@
 </head>
 <body>
 <div id="chat"></div>
+<script src="config.js"></script> <!-- optional: your own overrides, see config.example.js -->
 <script>
 // ===================== CONFIG — edit freely =====================
 const CONFIG = {
@@ -41,6 +42,14 @@ const CONFIG = {
   }
 };
 // ================================================================
+
+// Overrides from the optional config.js (USER_CONFIG). Objects (colors, classes, aliases) merge; arrays replace.
+function merge(base, over) {
+  for (const k in over)
+    base[k] = base[k] && typeof base[k] === "object" && !Array.isArray(base[k]) ? merge(base[k], over[k]) : over[k];
+  return base;
+}
+if (typeof USER_CONFIG !== "undefined") merge(CONFIG, USER_CONFIG);
 
 const params = new URLSearchParams(location.search);
 const channel = (params.get("channel") || CONFIG.channel).toLowerCase().replace(/^#/, "");
