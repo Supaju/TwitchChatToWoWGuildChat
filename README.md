@@ -81,13 +81,16 @@ const USER_CONFIG = {
 | `maxLines` | `12` | Lines kept on screen; the oldest is removed first |
 | `fadeSeconds` | `30` | Seconds before a line fades out (plus a 1 second fade). `0` = never fade; lines then only leave when `maxLines` is exceeded |
 | `ignoredUsers` | `nightbot, streamelements, streamlabs, spotchbot` | Lowercase usernames to hide |
+| `gmTag` | `"<GM>"` | Tag shown before the broadcaster's name; `""` for none |
+| `modTag` | `""` (off) | Tag shown before moderators' names, e.g. `"<Mod>"` or `"<Officer>"` |
 | `colorCommand` | `"!color"` | Chat command for changing your name color; `""` disables it |
 | `colorAliases` | `dk`, `dh` | Short names for the color command, mapping a lowercase alias to a class name |
 | `testIntervalMs` | `2000` | Delay between fake messages in test mode |
 | `colors.guild` | `#40FF40` | Guild chat text |
 | `colors.officer` | `#40C040` | Officer chat text (moderators) |
 | `colors.system` | `#FFFF00` | "has come online" lines |
-| `colors.gm` | `#FFD100` | The `<GM>` tag on the broadcaster |
+| `colors.gm` | `#FFD100` | The broadcaster's tag (`gmTag`) |
+| `colors.mod` | `#40C040` | The moderators' tag (`modTag`) |
 | `colors.classes` | 13 WoW classes | Class colors used for usernames |
 
 ### After editing

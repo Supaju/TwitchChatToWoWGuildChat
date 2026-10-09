@@ -8,11 +8,14 @@ const USER_CONFIG = {
   maxLines: 12,                    // lines kept on screen
   fadeSeconds: 30,                 // seconds before a line fades out (0 = never fade)
   ignoredUsers: ["nightbot", "streamelements", "streamlabs", "spotchbot"],  // lowercase usernames to hide
-  colorCommand: "!color",          // chat command for name colors ("" disables it)
+  gmTag: "<GM>",                   // tag before the broadcaster's name ("" = none)
+  modTag: "",                      // tag before moderators' names, e.g. "<Mod>" or "<Officer>" ("" = none)
+  colorCommand: "!color",         // chat command for name colors ("" disables it)
   colors: {
     guild: "#40FF40",              // guild chat text
     officer: "#40C040",            // officer chat text (moderators)
     system: "#FFFF00",             // "has come online" lines
-    gm: "#FFD100",                 // <GM> tag on the broadcaster
+    gm: "#FFD100",                 // the broadcaster's tag (gmTag)
+    mod: "#40C040",                // the moderators' tag (modTag)
   },
 };

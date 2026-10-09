@@ -25,14 +25,17 @@ const CONFIG = {
   maxLines: 12,                    // lines kept on screen
   fadeSeconds: 30,                 // seconds before a line fades out (0 = never fade)
   ignoredUsers: ["nightbot", "streamelements", "streamlabs", "spotchbot"], // lowercase
-  colorCommand: "!color",          // chatters type "!color Mage", "!color death knight", "!color #ff8800" or "!color reset" ("" disables)
+  gmTag: "<GM>",                   // tag shown before the broadcaster's name ("" = none)
+  modTag: "",                      // tag shown before moderators' names, e.g. "<Mod>" or "<Officer>" ("" = none)
+  colorCommand: "!color",         // chatters type "!color Mage", "!color death knight", "!color #ff8800" or "!color reset" ("" disables)
   colorAliases: { dk: "Death Knight", dh: "Demon Hunter" },  // short names accepted by the command (lowercase key -> class)
   testIntervalMs: 2000,          // ?test=1 fake message interval
   colors: {
     guild: "#40FF40",
     officer: "#40C040",
     system: "#FFFF00",
-    gm: "#FFD100",                 // the <GM> tag on the broadcaster
+    gm: "#FFD100",                 // the broadcaster's tag (gmTag)
+    mod: "#40C040",                // the moderators' tag (modTag)
     classes: {
       Warrior: "#C69B6D", Paladin: "#F48CBA", Hunter: "#AAD372", Rogue: "#FFF468",
       Priest: "#FFFFFF", "Death Knight": "#C41E3A", Shaman: "#0070DD", Mage: "#3FC7EB",
@@ -156,7 +159,8 @@ function handleChat(tags, login, text) {
   const m = text.match(/^\x01ACTION (.*)\x01$/);   // /me
   const body = m ? m[1] : text;
   const head = [span(isOfficer ? "[Officer] " : "[Guild] ", color)];
-  if (isGM) head.push(span("<GM> ", CONFIG.colors.gm, "gm"));
+  if (isGM && CONFIG.gmTag) head.push(span(CONFIG.gmTag + " ", CONFIG.colors.gm, "gm"));
+  if (isOfficer && CONFIG.modTag) head.push(span(CONFIG.modTag + " ", CONFIG.colors.mod));
   head.push(span(`[${name}]`, custom[login] || classColor(login), "name"), span(m ? " " : ": ", color));
   const line = addLine(...head, ...buildMessage(body, m ? "" : tags.emotes, color));
   line.dataset.id = tags.id || "";       // for CLEARMSG (single message deleted)
