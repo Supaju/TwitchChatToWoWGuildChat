@@ -24,7 +24,9 @@ const CONFIG = {
   maxLines: 12,                    // lines kept on screen
   fadeSeconds: 30,                 // seconds before a line fades out (0 = never fade)
   ignoredUsers: ["nightbot", "streamelements", "streamlabs", "spotchbot"], // lowercase
-  testIntervalMs: 2000,            // ?test=1 fake message interval
+  colorCommand: "!color",          // chatters type "!color Mage", "!color death knight", "!color #ff8800" or "!color reset" ("" disables)
+  colorAliases: { dk: "Death Knight", dh: "Demon Hunter" },  // short names accepted by the command (lowercase key -> class)
+  testIntervalMs: 2000,          // ?test=1 fake message interval
   colors: {
     guild: "#40FF40",
     officer: "#40C040",
@@ -53,6 +55,23 @@ function classColor(name) {
   let h = 5381;
   for (const c of name.toLowerCase()) h = ((h << 5) + h + c.charCodeAt(0)) >>> 0;
   return classColors[h % classColors.length];
+}
+
+// Per-user name colors set via the chat command; kept in OBS's browser storage so they survive restarts.
+let custom = {};
+try { custom = JSON.parse(localStorage.getItem("nameColors") || "{}"); } catch {}
+
+function colorCommand(login, text) {
+  const cmd = CONFIG.colorCommand.toLowerCase(), t = text.trim().toLowerCase();
+  if (!cmd || (t !== cmd && !t.startsWith(cmd + " "))) return false;
+  let arg = t.slice(cmd.length).trim();
+  arg = (Object.hasOwn(CONFIG.colorAliases, arg) ? CONFIG.colorAliases[arg] : arg).toLowerCase();
+  const cls = Object.entries(CONFIG.colors.classes).find(([k]) => k.toLowerCase() === arg);
+  if (/^#[0-9a-f]{6}$/.test(arg)) custom[login] = arg;
+  else if (cls) custom[login] = cls[1];
+  else if (arg === "reset") delete custom[login];
+  try { localStorage.setItem("nameColors", JSON.stringify(custom)); } catch {}
+  return true;                     // command lines are never shown, valid or not
 }
 
 function span(text, color, cls) {
@@ -114,6 +133,7 @@ function parseTags(raw) {
 
 function handleChat(tags, login, text) {
   if (CONFIG.ignoredUsers.includes(login.toLowerCase())) return;
+  if (colorCommand(login, text)) return;
   const badges = (tags.badges || "").split(",").map(b => b.split("/")[0]);
   const name = tags["display-name"] || login;
   const isGM = badges.includes("broadcaster");
@@ -128,7 +148,7 @@ function handleChat(tags, login, text) {
   const body = m ? m[1] : text;
   const head = [span(isOfficer ? "[Officer] " : "[Guild] ", color)];
   if (isGM) head.push(span("<GM> ", CONFIG.colors.gm, "gm"));
-  head.push(span(`[${name}]`, classColor(login), "name"), span(m ? " " : ": ", color));
+  head.push(span(`[${name}]`, custom[login] || classColor(login), "name"), span(m ? " " : ": ", color));
   const line = addLine(...head, ...buildMessage(body, m ? "" : tags.emotes, color));
   line.dataset.id = tags.id || "";       // for CLEARMSG (single message deleted)
   line.dataset.login = login;            // for CLEARCHAT (timeout / ban)

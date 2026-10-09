@@ -10,6 +10,7 @@ A single-file OBS Browser Source that shows your live Twitch chat styled like Wo
 - `[Guild] [Name]: message` formatting in guild green (`#40FF40`)
 - Moderators appear as `[Officer]` (`#40C040`); the broadcaster appears as `[Guild] <GM>`
 - Usernames get a WoW class color, chosen by hashing the username so each person always keeps the same color
+- Chatters can pick their own name color with `!color` (see [Name color command](#name-color-command))
 - Twitch emotes rendered inline
 - Yellow `[Name] has come online.` line the first time someone chats in a session
 - Messages stack from the bottom, keep a maximum number of lines, and fade out after a set time
@@ -67,6 +68,8 @@ Everything is in the commented `CONFIG` object at the top of `ttvguildchat.html`
 | `maxLines` | `12` | Lines kept on screen; the oldest is removed first |
 | `fadeSeconds` | `30` | Seconds before a line fades out (plus a 1 second fade). `0` = never fade; lines then only leave when `maxLines` is exceeded |
 | `ignoredUsers` | `nightbot, streamelements, streamlabs, spotchbot` | Lowercase usernames to hide |
+| `colorCommand` | `"!color"` | Chat command for changing your name color; `""` disables it |
+| `colorAliases` | `dk`, `dh` | Short names for the color command, mapping a lowercase alias to a class name |
 | `testIntervalMs` | `2000` | Delay between fake messages in test mode |
 | `colors.guild` | `#40FF40` | Guild chat text |
 | `colors.officer` | `#40C040` | Officer chat text (moderators) |
@@ -82,6 +85,19 @@ OBS loads the page once and doesn't watch the file. After changing anything:
 2. In OBS, select the Browser Source and click **Refresh cache of current page** in its Properties (or right-click the source and choose Refresh).
 
 The overlay reconnects within a few seconds. Lines currently on screen disappear.
+
+## Name color command
+
+Anyone in chat can change the color of their own name in the overlay:
+
+| Chat message | Result |
+|---|---|
+| `!color Mage` | Use that class's color (`Death Knight`, `Demon Hunter` etc. work too; not case sensitive) |
+| `!color DK` / `!color DH` | Shortcuts for Death Knight and Demon Hunter (add more in `colorAliases`) |
+| `!color #ff8800` | Use any 6-digit hex color |
+| `!color reset` | Back to the automatic color |
+
+The command message itself never appears in the overlay, and an invalid color is ignored. Choices are saved in OBS's browser storage, so they survive restarts. They are per OBS profile and are forgotten if you clear the browser source's cache. Set `colorCommand: ""` to turn the feature off.
 
 ## Troubleshooting
 
