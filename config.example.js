@@ -10,7 +10,8 @@ const USER_CONFIG = {
   ignoredUsers: ["nightbot", "streamelements", "streamlabs", "spotchbot"],  // lowercase usernames to hide
   gmTag: "<GM>",                   // tag before the broadcaster's name ("" = none)
   modTag: "<Mod>",                 // tag before moderators' names, e.g. "<Mod>" or "<Officer>" ("" = none)
-  colorCommand: "!color",         // chat command for name colors ("" disables it)
+  subMessage: "[{name}] has joined the guild.",  // yellow line for a new subscriber or gift recipient ("" = none)
+  colorCommand: "!color",        // chat command for name colors ("" disables it)
   colors: {
     guild: "#40FF40",              // guild chat text
     officer: "#40C040",            // officer chat text (moderators)

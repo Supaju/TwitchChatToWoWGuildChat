@@ -27,7 +27,8 @@ const CONFIG = {
   ignoredUsers: ["nightbot", "streamelements", "streamlabs", "spotchbot"], // lowercase
   gmTag: "<GM>",                   // tag shown before the broadcaster's name ("" = none)
   modTag: "<Mod>",                 // tag shown before moderators' names, e.g. "<Mod>" or "<Officer>" ("" = none)
-  colorCommand: "!color",         // chatters type "!color Mage", "!color death knight", "!color #ff8800" or "!color reset" ("" disables)
+  subMessage: "[{name}] has joined the guild.",  // yellow system line for a new subscriber or gift recipient ("" = none)
+  colorCommand: "!color",        // chatters type "!color Mage", "!color death knight", "!color #ff8800" or "!color reset" ("" disables)
   colorAliases: { dk: "Death Knight", dh: "Demon Hunter" },  // short names accepted by the command (lowercase key -> class)
   testIntervalMs: 2000,          // ?test=1 fake message interval
   colors: {
@@ -177,6 +178,13 @@ function handleLine(line) {
   if (d) { const id = parseTags(d[1])["target-msg-id"]; return id && removeLines(`.line[data-id="${CSS.escape(id)}"]`); }
   d = line.match(/^(?:@\S+ )?:tmi\.twitch\.tv CLEARCHAT #\S+(?: :(\S+))?/);
   if (d) return d[1] ? removeLines(`.line[data-login="${CSS.escape(d[1])}"]`) : (chat.textContent = "");
+  d = line.match(/^@(\S+) :tmi\.twitch\.tv USERNOTICE /);   // sub events
+  if (d) {
+    const t = parseTags(d[1]), id = t["msg-id"];
+    const who = id === "sub" ? t["display-name"] : /^(anon)?subgift$/.test(id) ? t["msg-param-recipient-display-name"] : "";
+    if (who && CONFIG.subMessage) addLine(span(CONFIG.subMessage.replaceAll("{name}", who), CONFIG.colors.system));
+    return;
+  }
   const r = line.match(/^(?:@(\S+) )?:(\w+)!\S+ PRIVMSG #\S+ :(.*)$/);
   if (r) handleChat(parseTags(r[1] || ""), r[2], r[3]);
 }

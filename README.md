@@ -83,6 +83,7 @@ const USER_CONFIG = {
 | `ignoredUsers` | `nightbot, streamelements, streamlabs, spotchbot` | Lowercase usernames to hide |
 | `gmTag` | `"<GM>"` | Tag shown before the broadcaster's name; `""` for none |
 | `modTag` | `"<Mod>"` | Tag shown before moderators' names, e.g. `"<Officer>"`; `""` for none |
+| `subMessage` | `"[{name}] has joined the guild."` | Yellow system line for a new subscriber (or the recipient of a gifted sub); `{name}` is replaced with their name; `""` for none. Resubs are not announced |
 | `colorCommand` | `"!color"` | Chat command for changing your name color; `""` disables it |
 | `colorAliases` | `dk`, `dh` | Short names for the color command, mapping a lowercase alias to a class name |
 | `testIntervalMs` | `2000` | Delay between fake messages in test mode |
