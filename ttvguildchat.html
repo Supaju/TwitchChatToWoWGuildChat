@@ -149,7 +149,7 @@ function handleChat(tags, login, text) {
   const badges = (tags.badges || "").split(",").map(b => b.split("/")[0]);
   const name = tags["display-name"] || login;
   const isGM = badges.includes("broadcaster");
-  const isOfficer = !isGM && badges.includes("moderator");
+  const isOfficer = !isGM && (badges.includes("moderator") || badges.includes("lead_moderator"));
   const color = isOfficer ? CONFIG.colors.officer : CONFIG.colors.guild;
 
   if (!seen.has(login)) {
