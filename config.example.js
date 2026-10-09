@@ -9,7 +9,7 @@ const USER_CONFIG = {
   fadeSeconds: 30,                 // seconds before a line fades out (0 = never fade)
   ignoredUsers: ["nightbot", "streamelements", "streamlabs", "spotchbot"],  // lowercase usernames to hide
   gmTag: "<GM>",                   // tag before the broadcaster's name ("" = none)
-  modTag: "",                      // tag before moderators' names, e.g. "<Mod>" or "<Officer>" ("" = none)
+  modTag: "<Mod>",                 // tag before moderators' names, e.g. "<Mod>" or "<Officer>" ("" = none)
   colorCommand: "!color",         // chat command for name colors ("" disables it)
   colors: {
     guild: "#40FF40",              // guild chat text
